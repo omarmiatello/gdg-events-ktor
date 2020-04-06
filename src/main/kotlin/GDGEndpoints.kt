@@ -2,7 +2,9 @@ package com.github.omarmiatello.gdgtools
 
 import com.github.omarmiatello.gdgtools.appengine.cacheUriOr
 import com.github.omarmiatello.gdgtools.data.*
+import com.github.omarmiatello.gdgtools.utils.formatFull
 import com.github.omarmiatello.gdgtools.utils.toJsonPretty
+import com.github.omarmiatello.gdgtools.utils.weekRangeFrom
 import io.ktor.application.call
 import io.ktor.html.Template
 import io.ktor.html.insert
@@ -16,6 +18,7 @@ import io.ktor.routing.route
 import kotlinx.html.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.list
+import java.util.*
 
 
 @Serializable
@@ -48,14 +51,14 @@ fun Routing.gdg() {
                 it.toResponse(events)
             }
             call.respondHtml {
-                head { title { +"GDG Italia - Tools Project" } }
+                head { title { +"GDG Europe - Tools Project" } }
                 body {
-                    h1 { +"GDG Italia" }
+                    h1 { +"GDG Europe" }
                     p { a("groups.json") { +"groups.json" } }
                     p { a("groups_events.json") { +"groups_events.json" } }
-                    p { +"Ci sono ${groupsAndEvents.count()} GDG in Italia" }
+                    p { +"There are ${groupsAndEvents.count()} GDG" }
 
-                    h1 { +"Gruppi" }
+                    h1 { +"Groups" }
                     groupsAndEvents.forEach { group ->
                         val events = group.events
 
@@ -92,7 +95,7 @@ fun Routing.gdg() {
             val events = FireDB.getEventsBy(gdgId).values.toEventResponseList()
             val group = FireDB.getGroup(gdgId)!!.toResponse(events)
             call.respondHtml {
-                head { title { +"GDG Italia - Tools Project" } }
+                head { title { +"GDG Europe - Tools Project" } }
                 body {
                     a("$gdgId.json") { +"$gdgId.json" }
                     div {
@@ -109,34 +112,34 @@ fun Routing.gdg() {
             }
         }
 
-        get("speakers.json") {
-            call.respondText(cacheUriOr {
-                val speakers = FireDB.speakersMap.values.toSpeakerResponseList()
-                speakers.toJsonPretty(SpeakerResponse.serializer().list)
-            })
-        }
-
-        get("speakers_slides.json") {
-            call.respondText(cacheUriOr {
-                val slidesMap = FireDB.slidesMap
-                val speakersAndSlides = FireDB.speakersMap.values.map {
-                    val slides = slidesMap[it.slug]?.values?.toSlideResponseList()
-                    it.toResponse(slides)
-                }
-                speakersAndSlides.toJsonPretty(SpeakerResponse.serializer().list)
-            })
-        }
-
-        get("speakers/{speaker}.json") {
-            cacheUriOr {
-                val speakerParam = call.parameters["speaker"]!!
-                val slides = FireDB.getSlidesBy(speakerParam).values.toSlideResponseList()
-                val speaker = FireDB.getSpeaker(speakerParam)?.toResponse(slides)
-                speaker?.toJsonPretty(SpeakerResponse.serializer()).orEmpty()
-            }.also {
-                if (it.isEmpty()) call.respond(HttpStatusCode.NotFound) else call.respondText(it)
-            }
-        }
+//        get("speakers.json") {
+//            call.respondText(cacheUriOr {
+//                val speakers = FireDB.speakersMap.values.toSpeakerResponseList()
+//                speakers.toJsonPretty(SpeakerResponse.serializer().list)
+//            })
+//        }
+//
+//        get("speakers_slides.json") {
+//            call.respondText(cacheUriOr {
+//                val slidesMap = FireDB.slidesMap
+//                val speakersAndSlides = FireDB.speakersMap.values.map {
+//                    val slides = slidesMap[it.slug]?.values?.toSlideResponseList()
+//                    it.toResponse(slides)
+//                }
+//                speakersAndSlides.toJsonPretty(SpeakerResponse.serializer().list)
+//            })
+//        }
+//
+//        get("speakers/{speaker}.json") {
+//            cacheUriOr {
+//                val speakerParam = call.parameters["speaker"]!!
+//                val slides = FireDB.getSlidesBy(speakerParam).values.toSlideResponseList()
+//                val speaker = FireDB.getSpeaker(speakerParam)?.toResponse(slides)
+//                speaker?.toJsonPretty(SpeakerResponse.serializer()).orEmpty()
+//            }.also {
+//                if (it.isEmpty()) call.respond(HttpStatusCode.NotFound) else call.respondText(it)
+//            }
+//        }
 
         get("tag.json") {
             call.respondText(cacheUriOr {
@@ -147,9 +150,9 @@ fun Routing.gdg() {
 
         get("tag") {
             call.respondHtml {
-                head { title { +"GDG Italia - Tools Project" } }
+                head { title { +"GDG Europe - Tools Project" } }
                 body {
-                    h1 { +"GDG Italia" }
+                    h1 { +"GDG Europe" }
                     knownTags.forEach {
                         p {
                             a("tag/${it.slug}") { +it.hashtag }
@@ -177,7 +180,7 @@ fun Routing.gdg() {
             if (tag != null) {
                 val tagEvents = tag.event.orEmpty()
                 call.respondHtml {
-                    head { title { +"GDG Italia - Tools Project" } }
+                    head { title { +"GDG Europe - Tools Project" } }
                     body {
                         h1 { +tag.hashtag }
                         a("$tagParam.json") { +"$tagParam.json" }
@@ -213,9 +216,9 @@ fun Routing.gdg() {
             val allEvents = FireDB.getAllEventByYear(yearParam).toEventResponseList()
 
             call.respondHtml {
-                head { title { +"GDG Italia - Tools Project" } }
+                head { title { +"GDG Europe - Tools Project" } }
                 body {
-                    h1 { +"GDG Italia" }
+                    h1 { +"GDG Europe" }
                     p { a("$yearParam.json") { +"$yearParam.json" } }
                     p { +"Ci sono ${allEvents.count()} eventi GDG nel $yearParam" }
 
@@ -259,6 +262,81 @@ fun Routing.gdg() {
 
 
                     }
+                }
+            }
+        }
+
+        get("next") {
+
+            val groupsMap = FireDB.groupsMap
+            val eventsMap = FireDB.eventsMap
+
+            val (start, end) = weekRangeFrom { add(Calendar.HOUR, 36) }
+            val (nextWeekStart, nextWeekEnd) = weekRangeFrom {
+                add(Calendar.HOUR, 36)
+                add(Calendar.DAY_OF_MONTH, 7)
+            }
+
+            val events = eventsMap.values
+                .flatMap { it.values }
+                .filter { Date(it.time).after(start.time) }
+                .sortedBy { it.time }
+                .toEventResponseList()
+
+            val (nextEvents, futureEvents1) = events.partition { Date(it.time).before(end.time) }
+            val (nextWeekEvents, futureEvents2) = futureEvents1.partition { Date(it.time).before(nextWeekEnd.time) }
+
+
+            call.respondHtml {
+                head { title { +"GDG Europe - Tools Project" } }
+
+
+                body {
+                    h1 { +"GDG Next Events" }
+                    p { +"There are ${nextEvents.count()} events this week, ${nextWeekEvents.count()} events next week, and soon other ${futureEvents2.count()} GDG events!" }
+
+                    fun showEvents(allEvents: List<EventResponse>) {
+                        p {
+                            allEvents
+                                .groupBy { Date(it.time).formatFull() }
+                                .forEach { (dateString, events) ->
+                                    h3 { +dateString }
+                                    events.forEach { event ->
+                                        val group = groupsMap.getValue(event.groupSlug) //.toResponse(null)!!
+                                        p {
+                                            with(event) {
+                                                b { +name }
+                                                if (meetupLink != null) {
+                                                    +" ("
+                                                    a(meetupLink) { +"Link" }
+                                                    +")"
+                                                }
+                                                br
+                                                a(group.meetupLink) { +group.name }
+                                                +" from $timeString - duration: ${duration / 3600 / 1000f} hours"
+                                                if (venueName != null) {
+                                                    br
+                                                    +"Location: "
+                                                    +"$venueName"
+                                                    val address = listOfNotNull(venueAddress, venueCity).joinToString(", ")
+                                                    if (address.isNotEmpty()) +" ($address)"
+                                                }
+                                                br
+                                            }
+                                        }
+                                    }
+                                }
+                        }
+                    }
+
+                    h3 { +"This week" }
+                    showEvents(nextEvents)
+
+                    h3 { +"Next week" }
+                    showEvents(nextWeekEvents)
+
+//                    h3 { +"After" }
+//                    showEvents(futureEvents2)
                 }
             }
         }

@@ -38,17 +38,23 @@ object MeetupApi {
     }
 
     private val httpTransport = UrlFetchTransport.getDefaultInstance()
-    private fun requestFactory(): HttpRequestFactory = httpTransport.createRequestFactory()
+    private fun requestFactory(): HttpRequestFactory = httpTransport.createRequestFactory {
+        it.connectTimeout = 60000
+        it.readTimeout = 60000
+        it.writeTimeout = 60000
+    }
 
     private fun get(methodPath: String) = requestFactory()
         .buildGetRequest(GenericUrl("$basePath/$methodPath"))
         .setHeaders(HttpHeaders().setAuthorization("Bearer $accessToken"))
         .execute()
 
+    fun getGroupDetail(urlname: String) = get(urlname).parse(MeetupGroup.serializer())
+
     fun findGroups(
         query: String,
         radius: String = "global",
-        limit: Int = 50,
+        limit: Int = 1000,
         page: Int = 0,
         lat: Double = 41.9,
         lon: Double = 12.48,

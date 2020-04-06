@@ -9,7 +9,7 @@ import kotlinx.serialization.serializer
 import java.util.*
 
 object FireDB : FirebaseDatabaseApi() {
-    override val basePath = "https://gdg-italia.firebaseio.com/"
+    override val basePath = "https://gdgeventlist.firebaseio.com/"
 
     private val KEY_GROUP = "group"
     private val KEY_GROUP_MEETUP_URLNAME = "group-meetup-urlname"
@@ -37,13 +37,22 @@ object FireDB : FirebaseDatabaseApi() {
     var slidesMap by fireMap(KEY_SLIDE, (String.serializer() to SERIALIZER_SLUG_SLIDE).map)
     var tagsMap by fireMap(KEY_TAG, SERIALIZER_SLUG_TAG)
 
+
+
     // group
+    fun addMeetupUrlnames(slug: String, urlname: String) {
+        this["$KEY_GROUP_MEETUP_URLNAME/$slug", String.serializer()] = urlname
+    }
 
     var allGroups: List<GroupDao>
         get() = groupsMap.values.toList()
         set(value) {
             groupsMap = value.sortedBy { it.slug }.associateBy { it.slug }
         }
+
+    fun addGroup(group: GroupDao) {
+        this["$KEY_GROUP/${group.slug}", GroupDao.serializer()] = group
+    }
 
     fun getGroup(groupSlug: String): GroupDao? = this["$KEY_GROUP/$groupSlug", GroupDao.serializer()]
 

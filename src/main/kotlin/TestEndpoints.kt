@@ -17,7 +17,7 @@ import kotlinx.html.*
 fun Routing.test() {
     suspend fun PipelineContext<Unit, ApplicationCall>.resp(msg: String) {
         call.respondHtml {
-            head { title { +"GDG Italia - Tools Project - Test" } }
+            head { title { +"GDG Europe - Tools Project - Test" } }
             body {
                 h3 {
                     a("/") { +call.request.host() }

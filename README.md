@@ -47,7 +47,7 @@ gradle appengineDeploy
 ```
 
 You can checkout deployed version of this sample application at
-https://gdg-italia.appspot.com
+https://gdgeventlist.appspot.com
 
 
 ## Converting to Google App Engine

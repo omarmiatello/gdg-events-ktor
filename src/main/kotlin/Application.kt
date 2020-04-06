@@ -48,7 +48,7 @@ fun Application.main() {
                 head {
                     meta { charset = "utf-8" }
                     meta("viewport", "width=device-width, initial-scale=1")
-                    title { +"GDG Italia - Tools Project" }
+                    title { +"GDG Europe - Tools Project" }
                     styleLink("https://cdnjs.cloudflare.com/ajax/libs/bulma/0.7.2/css/bulma.min.css")
                 }
                 body {
@@ -56,15 +56,15 @@ fun Application.main() {
                         div("container") {
                             h1("title") {
                                 +"Website ("
-                                a("https://github.com/omarmiatello/gdgitalia-tools-with-appengine-ktor") {
+                                a("https://github.com/omarmiatello/gdg-events-ktor") {
                                     +"source"
                                 }
                                 +")"
                             }
                             p { a("/gdg/groups") { +"groups" } }
                             p { a("/gdg/groups/gdg-milano") { +"groups/gdg-milano" } }
-                            p { a("/gdg/tag") { +"tag" } }
-                            p { a("/gdg/tag/devfest") { +"tag/devfest" } }
+//                            p { a("/gdg/tag") { +"tag" } }
+//                            p { a("/gdg/tag/devfest") { +"tag/devfest" } }
                             p { a("/gdg/calendar/2020") { +"calendar/2020" } }
                             h1("title") { +"API" }
                             div("columns") {
@@ -76,14 +76,14 @@ fun Application.main() {
                                         p { a("/gdg/groups/$slug.json") { +"groups/$slug.json" } }
                                     }
                                 }
-                                div("column") {
-                                    h2("subtitle") { +"Speakers API" }
-                                    p { a("/gdg/speakers.json") { +"speakers.json" } }
-                                    p { a("/gdg/speakers_slides.json") { +"speakers_slides.json" } }
-                                    speakers.forEach { slug ->
-                                        p { a("/gdg/speakers/$slug.json") { +"speakers/$slug.json" } }
-                                    }
-                                }
+//                                div("column") {
+//                                    h2("subtitle") { +"Speakers API" }
+//                                    p { a("/gdg/speakers.json") { +"speakers.json" } }
+//                                    p { a("/gdg/speakers_slides.json") { +"speakers_slides.json" } }
+//                                    speakers.forEach { slug ->
+//                                        p { a("/gdg/speakers/$slug.json") { +"speakers/$slug.json" } }
+//                                    }
+//                                }
                                 div("column") {
                                     h2("subtitle") { +"Tags API" }
                                     p { a("/gdg/tag.json") { +"tag.json" } }

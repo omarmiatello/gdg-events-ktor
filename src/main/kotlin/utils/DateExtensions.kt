@@ -23,15 +23,15 @@ inline val Calendar.month: Int get() = get(Calendar.MONTH)
 inline val Calendar.weekOfYear: Int get() = get(Calendar.WEEK_OF_YEAR)
 
 
-private val fullItalianFormatter = DateFormat.getDateInstance(DateFormat.FULL, Locale.ITALIAN)
-private val dayMonthFormatter = SimpleDateFormat("d MMM", Locale.ITALIAN)
+private val fullItalianFormatter = DateFormat.getDateInstance(DateFormat.FULL, Locale.ENGLISH)
+private val dayMonthFormatter = SimpleDateFormat("d MMM", Locale.ENGLISH)
 // val timeFormatter = DateFormat.getTimeInstance(DateFormat.SHORT, Locale.ITALIAN)
 fun Date.formatFull() = fullItalianFormatter.format(this)
 
 fun Date.formatDayMonth() = dayMonthFormatter.format(this)
 
 fun weekRangeFrom(fromCalendar: Calendar.() -> Unit): Pair<Calendar, Calendar> {
-    val start = Calendar.getInstance(Locale.ITALIAN).apply {
+    val start = Calendar.getInstance(Locale.ENGLISH).apply {
         fromCalendar()
         set(Calendar.HOUR_OF_DAY, 0)
         set(Calendar.MINUTE, 0)
@@ -39,7 +39,7 @@ fun weekRangeFrom(fromCalendar: Calendar.() -> Unit): Pair<Calendar, Calendar> {
         set(Calendar.MILLISECOND, 0)
         set(Calendar.DAY_OF_WEEK, Calendar.MONDAY) // Monday
     }
-    val end = Calendar.getInstance(Locale.ITALIAN).apply {
+    val end = Calendar.getInstance(Locale.ENGLISH).apply {
         time = start.time
         add(Calendar.DAY_OF_MONTH, 7)
         add(Calendar.MILLISECOND, -1)

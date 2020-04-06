@@ -61,7 +61,7 @@ appengine {
     }
     deploy {
         // configure deployment
-        projectId = "gdg-italia"
+        projectId = "gdgeventlist"
         version = "GCLOUD_CONFIG"
     }
 }
