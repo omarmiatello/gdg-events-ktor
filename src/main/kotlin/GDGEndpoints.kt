@@ -18,6 +18,8 @@ import io.ktor.routing.route
 import kotlinx.html.*
 import kotlinx.serialization.Serializable
 import kotlinx.serialization.list
+import kotlinx.serialization.map
+import kotlinx.serialization.serializer
 import java.util.*
 
 
@@ -263,6 +265,35 @@ fun Routing.gdg() {
 
                     }
                 }
+            }
+        }
+
+        get("next.json") {
+            cacheUriOr {
+                val eventsMap = FireDB.eventsMap
+
+                val (start, end) = weekRangeFrom { add(Calendar.HOUR, 36) }
+                val (nextWeekStart, nextWeekEnd) = weekRangeFrom {
+                    add(Calendar.HOUR, 36)
+                    add(Calendar.DAY_OF_MONTH, 7)
+                }
+
+                val events = eventsMap.values
+                    .flatMap { it.values }
+                    .filter { Date(it.time).after(start.time) }
+                    .sortedBy { it.time }
+                    .toEventResponseList()
+
+                val (nextEvents, futureEvents1) = events.partition { Date(it.time).before(end.time) }
+                val (nextWeekEvents, futureEvents2) = futureEvents1.partition { Date(it.time).before(nextWeekEnd.time) }
+
+                val eventListSerializer = EventResponse.serializer().list
+                mapOf(
+                    "thisweek" to nextEvents,
+                    "nextweek" to nextWeekEvents
+                ).toJsonPretty( (String.serializer() to eventListSerializer).map)
+            }.also {
+                if (it.isEmpty()) call.respond(HttpStatusCode.NotFound) else call.respondText(it)
             }
         }
 
